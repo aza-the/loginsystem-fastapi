@@ -9,7 +9,7 @@ def bind_routes(application: FastAPI) -> None:
     """Bind all routes"""
     for route in list_of_routes:
         application.include_router(route)
-    
+        
 app = FastAPI()
 
 bind_routes(app)

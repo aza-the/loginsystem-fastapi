@@ -1,4 +1,4 @@
-from app.routes.LoginSystem import route as login_system_route
+from app.routes.loginsystem import route as login_system_route
 
 list_of_routes = [
     login_system_route,
