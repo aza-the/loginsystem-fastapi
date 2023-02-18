@@ -1,5 +1,3 @@
-
-
 async function main(){
     let contactFormData = localStorage.getItem('Authorization'); // take JWT
 

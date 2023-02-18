@@ -31,11 +31,23 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     return {'access_token': access_token, 'token_type' : 'bearer'}
 
 
+@router.post('/signin', response_model=Token)
+async def signin_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+    new_user = await create_user(fake_users_db, form_data.username, form_data.password)
+    fake_users_db.update({new_user.username : dict(new_user)})
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={'sub' : new_user.username}, expires_delta=access_token_expires # type: ignore
+    )
+    print(fake_users_db)
+    return {'access_token': access_token, 'token_type' : 'bearer'}
+
+
 @router.get("/users/me", response_model=User)
 async def read_users_me(request: Request):
     return templates.TemplateResponse('user.html', context={'request' : request})
 
-    
+
 @router.get("/checkuser", response_model=User)
 async def check_users_me(current_user: User = Depends(get_current_active_user)):
     return current_user
@@ -44,5 +56,3 @@ async def check_users_me(current_user: User = Depends(get_current_active_user)):
 @router.get('/js/{js_file}')
 async def get_login_js(js_file: str):
     return FileResponse(f'app/static/js/{js_file}')
-
-

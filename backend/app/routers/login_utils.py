@@ -19,9 +19,8 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 fake_users_db = {
     "johndoe": {
         "username": "johndoe",
-        "full_name": "John Doe",
-        "email": "johndoe@example.com",
         "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
+        "is_admin" : True,
         "disabled": False,
     }
 }
@@ -39,8 +38,8 @@ def get_user(db: dict, username: str | None) -> UserInDB | None:
     if username in db:
         user_dict = db[username]
         return UserInDB(**user_dict)
-    
-    
+
+
 def authenticate_user(db: dict, username: str, password: str) -> User | bool:
     user = get_user(db, username)
     if not user:
@@ -85,3 +84,10 @@ async def get_current_active_user(current_user: User = Depends(get_current_user)
     if current_user.disabled:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Inactive user')
     return current_user
+
+async def create_user(db: dict, username: str, password: str):
+    if username in db:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail='Username already exists')
+    user_dict = {'username': username, 'hashed_password': get_password_hash(password)}
+    return UserInDB(**user_dict)    
+    
