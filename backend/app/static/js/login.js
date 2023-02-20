@@ -1,4 +1,4 @@
-console.log("Log loaded");
+console.log("login.js loaded");
 
 document.addEventListener('DOMContentLoaded', (event) => {
     document.getElementById("form-login").addEventListener("submit", async function(e) {

@@ -1,11 +1,14 @@
-from sqlalchemy import Column, String, UUID, Boolean
+import uuid
 
-from app.db.database import Base
+from app.config.default import Base
+from sqlalchemy import UUID, Boolean, Column, String
+
 
 class User(Base):
     __tablename__ = 'users'
     
-    id = Column(UUID, primary_key=True, index=True)
-    login = Column(String, nullable=False, unique=True, index=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4)
+    username = Column(String, nullable=False, unique=True, index=True)
     hashed_password = Column(String, nullable=False)
-    is_active = Column(Boolean, default=True)
+    disabled = Column(Boolean, default=False)
+    is_admin = Column(Boolean, default=False)

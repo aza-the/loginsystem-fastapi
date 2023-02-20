@@ -1,29 +1,20 @@
 from datetime import datetime, timedelta
 
-from app.routers.login_schemas import Token, TokenData, User, UserInDB
+from app.db.connection import get_user_dal
+from app.db.dal.userdal import UserDAL
+from app.schemas.login_schemas import TokenData, User, UserCreate
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from pydantic import BaseModel
 
 SECRET_KEY = '3bc430ba36c78dcb5f3a9a47ad81b429e23355e09128c6c945ebd6b8c245a5b3'
 ALGORITHM = 'HS256'
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-
 pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
-
-fake_users_db = {
-    "johndoe": {
-        "username": "johndoe",
-        "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
-        "is_admin" : True,
-        "disabled": False,
-    }
-}
 
 
 def verify_password(plain_password: str, hash_password: str) -> bool:
@@ -34,22 +25,23 @@ def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
 
-def get_user(db: dict, username: str | None) -> UserInDB | None:
-    if username in db:
-        user_dict = db[username]
-        return UserInDB(**user_dict)
+async def get_user(user_dal, username: str) -> User | None:
+    user = await user_dal.get_user_by_username(username)
+    if user:
+        user ,= user
+    return user
 
 
-def authenticate_user(db: dict, username: str, password: str) -> User | bool:
-    user = get_user(db, username)
+async def authenticate_user(user_dal, username: str, password: str) -> User | bool:
+    user = await get_user(user_dal, username)
     if not user:
         return False
-    if not verify_password(password, user.hashed_password):
+    if not verify_password(password, user.hashed_password): # type: ignore
         return False
     return user
 
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None):
+def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
@@ -60,7 +52,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     return encoded_jwt
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
+async def get_current_user(user_dal: UserDAL = Depends(get_user_dal), token: str = Depends(oauth2_scheme)) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -74,20 +66,24 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
         token_data = TokenData(username=username)
     except JWTError:
         raise credentials_exception
-    user = get_user(fake_users_db, username=token_data.username)
+    user = await get_user(user_dal, username=token_data.username) # type: ignore
     if user is None:
         raise credentials_exception
     return user
 
 
-async def get_current_active_user(current_user: User = Depends(get_current_user)):
+async def get_current_active_user(current_user: User = Depends(get_current_user)) -> User:
     if current_user.disabled:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Inactive user')
     return current_user
 
-async def create_user(db: dict, username: str, password: str):
-    if username in db:
+
+async def create_user(user_dal: UserDAL, username: str, password: str) -> UserCreate:
+    user = await user_dal.get_user_by_username(username)
+    if user is not None:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail='Username already exists')
     user_dict = {'username': username, 'hashed_password': get_password_hash(password)}
-    return UserInDB(**user_dict)    
+    new_user = UserCreate(**user_dict)
+    await user_dal.create_user(new_user)
+    return new_user
     
