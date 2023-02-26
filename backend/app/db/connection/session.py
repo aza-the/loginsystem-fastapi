@@ -2,7 +2,7 @@ from app.db.dal.userdal import UserDAL
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-SQLALCHEMY_DATABASE_URL = 'postgresql+asyncpg://postgres:mysecretpassword@0.0.0.0:5432/fastapi'
+SQLALCHEMY_DATABASE_URL = 'postgresql+asyncpg://postgres:postgres@0.0.0.0:5432/fastapi'
 
 
 

@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 
 from app.db.connection import get_user_dal
 from app.db.dal.userdal import UserDAL
+from app.db.models import login_models
 from app.schemas.login_schemas import TokenData, User, UserCreate
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -25,14 +26,14 @@ def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
 
-async def get_user(user_dal, username: str) -> User | None:
+async def get_user(user_dal: UserDAL, username: str) -> login_models.User:
     user = await user_dal.get_user_by_username(username)
     if user:
         user ,= user
     return user
 
 
-async def authenticate_user(user_dal, username: str, password: str) -> User | bool:
+async def authenticate_user(user_dal: UserDAL, username: str, password: str) -> User | bool:
     user = await get_user(user_dal, username)
     if not user:
         return False
