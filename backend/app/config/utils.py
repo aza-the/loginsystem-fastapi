@@ -7,4 +7,8 @@ def get_settings() -> DefaultSettings:
     if env == "local":
         return DefaultSettings()
     
+    # ...
+    # space for other settings
+    # ...
+    
     return DefaultSettings()
