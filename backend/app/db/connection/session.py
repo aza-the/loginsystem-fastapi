@@ -1,9 +1,7 @@
+from app.config.utils import get_settings
 from app.db.dal.userdal import UserDAL
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
-
-SQLALCHEMY_DATABASE_URL = 'postgresql+asyncpg://postgres:postgres@0.0.0.0:5432/fastapi'
-
 
 
 class SessionManager:
@@ -29,8 +27,7 @@ class SessionManager:
     # TODO make settings
     def refresh(self) -> None:
         self.engine = create_async_engine(
-            # get_settings().database_uri_async, echo=True, future=True
-            SQLALCHEMY_DATABASE_URL, echo=True, future=True
+            get_settings().database_uri_async, echo=True, future=True
         )
         
     # ! temporary work with engine
