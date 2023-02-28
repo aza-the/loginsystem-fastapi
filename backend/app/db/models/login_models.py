@@ -1,6 +1,6 @@
 import uuid
 
-from app.config import Base
+from app.db import Base
 from sqlalchemy import UUID, Boolean, Column, String
 
 

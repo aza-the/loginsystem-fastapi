@@ -1,6 +1,6 @@
 from os import environ
 
-from app.config.default import DefaultSettings
+from .default import DefaultSettings
 
 def get_settings() -> DefaultSettings:
     env = environ.get("ENV", "local")
