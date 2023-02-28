@@ -2,9 +2,6 @@ from os import environ
 
 from dotenv import load_dotenv
 from pydantic import BaseSettings
-from sqlalchemy.ext.declarative import declarative_base
-
-Base = declarative_base()
 
 load_dotenv()
 

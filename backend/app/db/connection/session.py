@@ -24,15 +24,11 @@ class SessionManager:
             self.engine, expire_on_commit=False, class_=AsyncSession  # type: ignore (Pylance for some reason mad at self.engine)
         )
 
-    # TODO make settings
+    
     def refresh(self) -> None:
         self.engine = create_async_engine(
             get_settings().database_uri_async, echo=True, future=True
         )
-        
-    # ! temporary work with engine
-    def get_engine(self):
-        return self.engine
 
 async def get_user_dal() -> UserDAL: # type: ignore
     async_session = SessionManager().get_session_maker()
