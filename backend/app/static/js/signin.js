@@ -1,4 +1,4 @@
-console.log("login.js loaded");
+console.log("signin.js loaded");
 
 document.addEventListener('DOMContentLoaded', (event) => {
     document.getElementById("form-login").addEventListener("submit", async function(e) {
@@ -19,7 +19,7 @@ async function submitData(){
         )
     }
 
-    let response = await fetch("/login", requestOptions);
+    let response = await fetch("/signin", requestOptions);
     const data = await response.json();
 
     if(!response.ok) {

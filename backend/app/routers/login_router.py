@@ -34,6 +34,9 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     )
     return {'access_token': access_token, 'token_type' : 'bearer'}
 
+@router.get('/signin', response_class=HTMLResponse)
+async def signin_page(request: Request):
+    return templates.TemplateResponse('signin.html', context={'request': request})
 
 @router.post('/signin', response_model=login_schemas.Token)
 async def signin_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), user_dal: UserDAL = Depends(get_user_dal)):
@@ -55,6 +58,6 @@ async def check_users_me(current_user: login_schemas.User = Depends(login_utils.
     return current_user
 
 
-@router.get('/js/{js_file}')
-async def get_login_js(js_file: str):
-    return FileResponse(f'app/static/js/{js_file}')
+@router.get('/{static_dir}/{static_file}')
+async def get_login_static_file(static_dir: str, static_file: str):
+    return FileResponse(f'app/static/{static_dir}/{static_file}')

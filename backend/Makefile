@@ -27,4 +27,16 @@ alembic_upgrade:
 
 alembic_downgrade:
 	alembic -c $(ALEMBIC_PATH) downgrade heads
+
+drun_docker:
+	docker build --build-arg APP_PORT=$(APP_PORT) -t login_image . \
+	&& docker run -dp $(APP_PORT):8000 --name login_container login_image
+
+exec_docker:
+	docker exec -it login_container bash
+
+del_docker:
+	docker rm -f login_container && docker image rm -f login_image
+
+# del_none: docker rmi $(docker images --filter "dangling=true" -q --no-trunc)
 	
